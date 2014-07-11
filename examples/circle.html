@@ -23,7 +23,7 @@ var arc = d3.svg.arc()
 
 var pie = d3.layout.pie()
     .sort(null)
-    .value(function(d) { return d.poids; });
+    .value(function(d) { return d.nombre; });
 
 var svg = d3.select(".circle_graph").append("svg")
     .attr("width", width)
@@ -34,7 +34,7 @@ var svg = d3.select(".circle_graph").append("svg")
 d3.csv("plugins/d3js/examples/source_circle.csv", function(error, data) {
 
   data.forEach(function(d) {
-    d.poids = +d.poids;
+    d.nombre = +d.nombre;
   });
 
   var g = svg.selectAll(".arc")
