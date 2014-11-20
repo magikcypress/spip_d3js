@@ -7,9 +7,6 @@
 	logo="prive/themes/spip/images/d3js-64.png"
 	documentation=""
 >
-	<!--
-		Paquet genere le 2013-08-16 15:24:11
-	-->
 
 	<nom>d3js</nom>
 
@@ -17,7 +14,8 @@
 
 	<licence>GNU/GPL</licence>
 	<pipeline nom="autoriser" inclure="d3js_autorisations.php" /> 
-	<pipeline nom="insert_head"      action="insert_head_public"    inclure="d3js_pipelines.php" />
-	<pipeline nom="header_prive"     action="insert_head_prive"     inclure="d3js_pipelines.php" />
+	<pipeline nom="jquery_plugins" inclure="d3js_pipelines.php" />
+	<pipeline nom="header_prive_css" action="header_prive_css" inclure="d3js_pipelines.php" />
+	<pipeline nom="insert_head_css" action="insert_head_css" inclure="d3js_pipelines.php" />
 
 </paquet>
