@@ -62,7 +62,6 @@ $(document).ready(function($) {
 
 	}
 
-
     /*
      * Créer des bar chart a partir d'un tableau HTML 
      * Créer un tableau dans SPIP avec les données.
@@ -127,20 +126,16 @@ $(document).ready(function($) {
                 .orient("left")
                 .ticks(20);
 
-            var tip = d3.tip()
-              .attr('class', 'd3-tip')
-              .offset([-10, 0])
-              .html(function(d) {
-                return "<strong>" + title_label + "</strong> <span style='color:red'>" + d.value + "</span>";
-              })
+			var div = d3.select("body")
+				.append("div")
+				.attr("class", "tooltip_bar")
+				.style("opacity", 0);
 
             var svg = d3.select("#bar" + i).append("svg")
                 .attr("width", width + margin.left + margin.right)
                 .attr("height", height + margin.top + margin.bottom)
                 .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-                svg.call(tip);
 
                 x.domain(json.map(function(d) {return d.label; }));
                 y.domain([0, d3.max(json, function(d) { return d.value; })]);
@@ -169,8 +164,21 @@ $(document).ready(function($) {
                     .attr("width", x.rangeBand())
                     .attr("y", function(d) { return y(d.value); })
                     .attr("height", function(d) { return height - y(d.value); })
-                    .on('mouseover', tip.show)
-                    .on('mouseout', tip.hide);
+				    .on("mouseover", function(d) {
+				        div.transition()
+				            .duration(500)
+				            .style("opacity", 0);
+				        div.transition()
+				            .duration(200)
+				            .style("opacity", .9);    
+				        div.html(d.label + "<br/>"  + d.value + " " + title_value)
+				            .style("left", (d3.event.pageX - 10) + "px")
+				            .style("top", (d3.event.pageY - 10) + "px")
+				            .style("background-color", "#000000")
+				            .style("border", "1px solid " + d.color)
+				            .style("color", "#FFFFFF")
+				            .style("z-index", 5000); 
+				    });
 
                 svg.append("text")
                     .attr("x", (width / 2))             
@@ -182,7 +190,25 @@ $(document).ready(function($) {
             $(".bar table").hide();
 
        });
-   }
+    }
+
+    /*
+     * Créer des line chart a partir d'un tableau HTML 
+     * Créer un tableau dans SPIP avec les données.
+     * Mettre en entête label, value, color (facultatif)
+     * Le label doit être une date
+     * Entourer le tableau par <div class="ligne"></div>
+     *
+     * Exemple de tableau
+     *
+	 * <div class="ligne">
+	 * ||Line chart alcohol|Line chart alcohol||
+	 * |{{date}}|{{user}}|
+	 * |1-May-12|64131|
+	 * |30-Apr-12|18812|
+	 * |27-Apr-12|38812|
+	 * </div>
+     */
 
     if($('.ligne').size() > 0) {
 
@@ -216,7 +242,10 @@ $(document).ready(function($) {
 			    width = 660 - margin.left - margin.right,
 			    height = 500 - margin.top - margin.bottom;
 
-			var x = d3.scale.linear()
+			var parseDate = d3.time.format("%d-%b-%y").parse;
+			var tooltipDate = d3.time.format("%e %b");
+
+			var x = d3.time.scale()
 			    .range([0, width]);
 
 			var y = d3.scale.linear()
@@ -234,11 +263,21 @@ $(document).ready(function($) {
 			    .x(function(d) { return x(d.label); })
 			    .y(function(d) { return y(d.value); });
 
+			var div = d3.select("body")
+			    .append("div")
+			    .attr("class", "tooltip")
+			    .style("opacity", 0);
+
 			var svg = d3.select("#ligne" + i).append("svg")
 			    .attr("width", width + margin.left + margin.right)
 			    .attr("height", height + margin.top + margin.bottom)
 			  	.append("g")
 			    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+			json.forEach(function(d) {
+				d.label = parseDate(d.label);
+			    d.value = +d.value;
+			});
 
             x.domain(d3.extent(json, function(d) { return d.label; }));
   			y.domain(d3.extent(json, function(d) { return d.value; }));
@@ -269,6 +308,26 @@ $(document).ready(function($) {
                 .attr("text-anchor", "middle")  
                 .style("font-size", "20px") 
                 .text(caption);
+
+			svg.selectAll("dot")                                    
+			   	.data(json)                                            
+			    .enter().append("circle")                                
+			    .attr("fill", "steelblue")
+			    .attr("r", 2)    
+			    .attr("cx", function(d) { return x(d.label); })         
+			    .attr("cy", function(d) { return y(d.value); })
+			    .on("mouseover", function(d) {
+			        div.transition()
+			            .duration(500)
+			            .style("opacity", 0);
+			        div.transition()
+			            .duration(200)
+			            .style("opacity", .9);    
+			        div.html(tooltipDate(d.label) + "<br/>"  + d.value)
+			            .style("left", (d3.event.pageX) + "px")
+			            .style("top", (d3.event.pageY - 28) + "px")
+			            .style("z-index", 5000); 
+				});
 
 			$(".ligne table").hide();
 		});
