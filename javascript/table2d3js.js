@@ -6,11 +6,11 @@ $(document).ready(function($) {
 	 * Utilisation de d3pie a partir d'un tableau HTML 
 	 * Créer un tableau dans SPIP avec les données.
 	 * Mettre en entête label, value, color
-	 * Entourer le tableau par <div class="pie"></div>
+	 * Entourer le tableau par <div class="d3pie"></div>
 	 *
 	 * Exemple de tableau
 	 *
-	 * <div class="pie">
+	 * <div class="d3pie">
 	 * ||Bar chart language|Bar chart language||
 	 * |{{language}}|{{user}}|{{color}}|
 	 * |JavaScript|264131|green|
@@ -19,9 +19,9 @@ $(document).ready(function($) {
 	 * </div>
 	 */
 
-	if($('.pie').size() > 0){
+	if($('.d3pie').size() > 0){
 
-		$(".pie").each(function(i) {
+		$(".d3pie").each(function(i) {
 
 			var caption = $(this).find("table caption").html();
 		 	var json = [];
@@ -39,9 +39,9 @@ $(document).ready(function($) {
 		        json.push(item);
 		    });
 
-		    $(this).append('<div id="pie' + i + '"></div>');
+		    $(this).append('<div id="d3pie' + i + '"></div>');
 
-		  	var pie = new d3pie("pie" + i, {
+		  	var pie = new d3pie("d3pie" + i, {
 				size: {
 					canvasHeight: 660,
 					canvasWidth: 660
@@ -56,7 +56,7 @@ $(document).ready(function($) {
 			      content: json 
 			    }
 		  	});
-		  	$(".pie table").hide();
+		  	$(".d3pie table").hide();
 
 		});
 
@@ -66,11 +66,11 @@ $(document).ready(function($) {
      * Créer des bar chart a partir d'un tableau HTML 
      * Créer un tableau dans SPIP avec les données.
      * Mettre en entête label, value, color
-     * Entourer le tableau par <div class="bar"></div>
+     * Entourer le tableau par <div class="d3bar"></div>
      *
      * Exemple de tableau
      *
-     * <div class="bar">
+     * <div class="d3bar">
      * ||Bar chart language|Bar chart language||
      * |{{language}}|{{user}}|{{color}}|
      * |JavaScript|264131|green|
@@ -79,9 +79,9 @@ $(document).ready(function($) {
      * </div>
      */
 
-    if($('.bar').size() > 0) {
+    if($('.d3bar').size() > 0) {
 
-        $(".bar").each(function(i) {
+        $(".d3bar").each(function(i) {
 
             var caption = $(this).find("table caption").html();
             var title_label = $(this).find('table th').eq(0).html();
@@ -105,7 +105,7 @@ $(document).ready(function($) {
                 json.push(item);
             });
 
-            $(this).append('<div id="bar' + i + '"></div>');
+            $(this).append('<div id="d3bar' + i + '"></div>');
 
             var margin = {top: 20, right: 20, bottom: 30, left: 40},
                 width = 660 - margin.left - margin.right,
@@ -131,7 +131,7 @@ $(document).ready(function($) {
 				.attr("class", "tooltip_bar")
 				.style("opacity", 0);
 
-            var svg = d3.select("#bar" + i).append("svg")
+            var svg = d3.select("#d3bar" + i).append("svg")
                 .attr("width", width + margin.left + margin.right)
                 .attr("height", height + margin.top + margin.bottom)
                 .append("g")
@@ -155,7 +155,7 @@ $(document).ready(function($) {
                     .style("text-anchor", "end")
                     .text(title_value);
 
-                svg.selectAll(".bar")
+                svg.selectAll(".d3bar")
                     .data(json)
                     .enter().append("rect")
                     .attr("class", "bar")
@@ -187,7 +187,7 @@ $(document).ready(function($) {
                     .style("font-size", "20px") 
                     .text(caption);
 
-            $(".bar table").hide();
+            $(".d3bar table").hide();
 
        });
     }
@@ -197,11 +197,11 @@ $(document).ready(function($) {
      * Créer un tableau dans SPIP avec les données.
      * Mettre en entête label, value, color (facultatif)
      * Le label doit être une date
-     * Entourer le tableau par <div class="ligne"></div>
+     * Entourer le tableau par <div class="d3ligne"></div>
      *
      * Exemple de tableau
      *
-	 * <div class="ligne">
+	 * <div class="d3ligne">
 	 * ||Line chart alcohol|Line chart alcohol||
 	 * |{{date}}|{{user}}|
 	 * |1-May-12|64131|
@@ -210,9 +210,9 @@ $(document).ready(function($) {
 	 * </div>
      */
 
-    if($('.ligne').size() > 0) {
+    if($('.d3ligne').size() > 0) {
 
-        $(".ligne").each(function(i) {
+        $(".d3ligne").each(function(i) {
 
             var caption = $(this).find("table caption").html();
             var title_label = $(this).find('table th').eq(0).html();
@@ -236,7 +236,7 @@ $(document).ready(function($) {
                 json.push(item);
             });
 
-            $(this).append('<div id="ligne' + i + '"></div>');
+            $(this).append('<div id="d3ligne' + i + '"></div>');
 
 			var margin = {top: 20, right: 20, bottom: 30, left: 50},
 			    width = 660 - margin.left - margin.right,
@@ -268,7 +268,7 @@ $(document).ready(function($) {
 			    .attr("class", "tooltip")
 			    .style("opacity", 0);
 
-			var svg = d3.select("#ligne" + i).append("svg")
+			var svg = d3.select("#d3ligne" + i).append("svg")
 			    .attr("width", width + margin.left + margin.right)
 			    .attr("height", height + margin.top + margin.bottom)
 			  	.append("g")
@@ -329,7 +329,7 @@ $(document).ready(function($) {
 			            .style("z-index", 5000); 
 				});
 
-			$(".ligne table").hide();
+			$(".d3ligne table").hide();
 		});
 	}
 
