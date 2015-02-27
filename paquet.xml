@@ -10,7 +10,7 @@
 
 	<nom>d3js</nom>
 
-	<auteur>vincent</auteur>
+	<auteur>cyp</auteur>
 
 	<licence>GNU/GPL</licence>
 	<pipeline nom="autoriser" inclure="d3js_autorisations.php" /> 
