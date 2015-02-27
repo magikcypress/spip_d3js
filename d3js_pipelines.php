@@ -3,8 +3,8 @@
  * Utilisations de pipelines par d3js
  *
  * @plugin     d3js
- * @copyright  2013
- * @author     vincent
+ * @copyright  2015
+ * @author     cyp
  * @licence    GNU/GPL
  * @package    SPIP\D3js\Pipelines
  */
