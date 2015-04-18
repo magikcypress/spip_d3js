@@ -10,7 +10,12 @@
 }
 
 .x.axis path {	
-	display: none;
+	stroke: #D3D3D3;
+}
+
+.x.axis line,
+.y.axis line {
+	stroke: lightgrey;
 }
 
 .line {
@@ -52,7 +57,9 @@ div.tooltip {
 
 text {
 	font: bold 10px sans-serif;
+	font-family: open sans;
 }
+
 
 .d3-tip {
 	line-height: 1;

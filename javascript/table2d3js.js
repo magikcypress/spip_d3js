@@ -1,5 +1,3 @@
-
-
 $(document).ready(function($) {
 
 	/*
@@ -138,7 +136,7 @@ $(document).ready(function($) {
 			var yAxis = d3.svg.axis()
 				.scale(y)
 				.orient("left")
-				.ticks(20);
+				.ticks(6);
 
 			var div = d3.select("body")
 				.append("div")
@@ -173,15 +171,18 @@ $(document).ready(function($) {
 					.attr("x", (width / 2))
 					.attr("y", 1 - (margin.top / 1.5))
 					.attr("text-anchor", "middle")
-					.style("font-size", "20px") 
+					.attr("fill", "#333333")
+					.style("font-size", "20px")
+					.style("font-family", "open sans")
 					.text(caption);
 
 				svg.append("text")
 					.attr("x", (width / 2))
 					.attr("y", 1 - (margin.top / 2.8))
 					.attr("text-anchor", "middle")
-					.attr("fill", "#999999") 
-					.style("font-size", "12px") 
+					.attr("fill", "#999999")
+					.style("font-size", "12px")
+					.style("font-family", "open sans")
 					.text(summary);
 
 				svg.selectAll(".d3bar")
@@ -280,10 +281,12 @@ $(document).ready(function($) {
 
 			var xAxis = d3.svg.axis()
 				.scale(x)
-				.orient("bottom");
+				.tickSize(-height)
+				.tickSubdivide(1);
 
 			var yAxis = d3.svg.axis()
 				.scale(y)
+				.ticks(6)
 				.orient("left");
 
 			var line = d3.svg.line()
@@ -330,10 +333,12 @@ $(document).ready(function($) {
 				.attr("d", line);
 
 			svg.append("text")
-				.attr("x", (width / 2))             
+				.attr("x", (width / 2))
 				.attr("y", 4 - (margin.top / 1.5))
-				.attr("text-anchor", "middle")  
-				.style("font-size", "20px") 
+				.attr("text-anchor", "middle")
+				.attr("fill", "#333333")
+				.style("font-size", "20px")
+				.style("font-family", "open sans")
 				.text(caption);
 
 			svg.append("text")
@@ -342,15 +347,16 @@ $(document).ready(function($) {
 				.attr("text-anchor", "middle")
 				.attr("fill", "#999999") 
 				.style("font-size", "12px") 
+				.style("font-family", "open sans")
 				.text(summary);
 
-			svg.selectAll("dot")                                    
-				.data(json)                                            
-				.enter().append("circle")   
-				.attr("class", "circle")                             
+			svg.selectAll("dot")
+				.data(json)
+				.enter().append("circle")
+				.attr("class", "circle")
 				.attr("fill", "steelblue")
-				.attr("r", 6)    
-				.attr("cx", function(d) { return x(d.label); })         
+				.attr("r", 6)
+				.attr("cx", function(d) { return x(d.label); })
 				.attr("cy", function(d) { return y(d.value); })
 				.on("mouseover", function(d) {
 					div.transition()
@@ -358,15 +364,14 @@ $(document).ready(function($) {
 						.style("opacity", 0);
 					div.transition()
 						.duration(200)
-						.style("opacity", .9);    
-					div.html(tooltipDate(d.label) + "<br/>"  + d.value)
+						.style("opacity", .9);
+					div.html(tooltipDate(d.label) + "<br/>"  + d.value + " " + title_value)
 						.style("left", (d3.event.pageX) + "px")
 						.style("top", (d3.event.pageY - 28) + "px")
-						.style("z-index", 5000); 
+						.style("z-index", 5000);
 				});
 
 			$(".d3ligne table").hide();
 		});
 	}
-
 });
