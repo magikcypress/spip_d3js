@@ -1,8 +1,8 @@
 /*!
  * d3pie
  * @author Ben Keen
- * @version 0.1.4
- * @date Oct 2014 - [still in dev!]
+ * @version 0.1.9
+ * @date June 17th, 2015
  * @repo http://github.com/benkeen/d3pie
  */
 
@@ -14,7 +14,7 @@
   } else if (typeof exports === 'object') {
     // Node. Does not work with strict CommonJS, but only CommonJS-like environments that support module.exports,
     // like Node
-    module.exports = factory(require());
+    module.exports = factory();
   } else {
     // browser globals (root is window)
     root.d3pie = factory(root);
@@ -22,7 +22,7 @@
 }(this, function() {
 
 	var _scriptName = "d3pie";
-	var _version = "0.1.4";
+	var _version = "0.1.6";
 
 	// used to uniquely generate IDs and classes, ensuring no conflict between multiple pies on the same page
 	var _uniqueIDCounter = 0;
@@ -115,8 +115,9 @@ var defaultSettings = {
 		},
 		truncation: {
 			enabled: false,
-			length: 30
-		}
+			truncateLength: 30
+		},
+    formatter: null
 	},
 	effects: {
 		load: {
@@ -135,6 +136,7 @@ var defaultSettings = {
 		enabled: false,
 		type: "placeholder", // caption|placeholder
     string: "",
+    placeholderParser: null,
 		styles: {
       fadeInSpeed: 250,
 			backgroundColor: "#000000",
@@ -199,7 +201,7 @@ var validate = {
 		}
 
 		// confirm element is either a DOM element or a valid string for a DOM element
-		if (!(element instanceof HTMLElement)) {
+		if (!(element instanceof HTMLElement || element instanceof SVGElement)) {
 			console.error("d3pie error: the first d3pie() param must be a valid DOM element (not jQuery) or a ID string.");
 			return false;
 		}
@@ -241,6 +243,7 @@ var validate = {
 		return true;
 	}
 };
+
 	//// --------- helpers.js -----------
 var helpers = {
 
@@ -595,10 +598,13 @@ var math = {
 		var h = size.canvasHeight - canvasPadding.top - canvasPadding.bottom;
 
 		// now factor in the footer, title & subtitle
-		h -= pie.textComponents.headerHeight;
-		if (pie.textComponents.footer.exists) {
-			h -= pie.textComponents.footer.h;
-		}
+    if (pie.options.header.location !== "pie-center") {
+      h -= pie.textComponents.headerHeight;
+    }
+
+    if (pie.textComponents.footer.exists) {
+      h -= pie.textComponents.footer.h;
+    }
 
 		// for really teeny pies, h may be < 0. Adjust it back
 		h = (h < 0) ? 0 : h;
@@ -775,6 +781,7 @@ var math = {
 			(theta1 <= angle) && (angle <= theta2);
 	}
 };
+
 	//// --------- labels.js -----------
 var labels = {
 
@@ -802,17 +809,28 @@ var labels = {
 			.attr("class", pie.cssPrefix + "labelGroup-" + section)
 			.style("opacity", 0);
 
+    var formatterContext = { section: section, sectionDisplayType: sectionDisplayType };
+
 		// 1. Add the main label
 		if (include.mainLabel) {
 			labelGroup.append("text")
 				.attr("id", function(d, i) { return pie.cssPrefix + "segmentMainLabel" + i + "-" + section; })
 				.attr("class", pie.cssPrefix + "segmentMainLabel-" + section)
-				.text(function(d) {
+				.text(function(d, i) {
 					var str = d.label;
-					if (settings.truncation.enabled && d.label.length > settings.truncation.length) {
-						str = d.label.substring(0, settings.truncation.length) + "...";
-					}
-					return str;
+
+          // if a custom formatter has been defined, pass it the raw label string - it can do whatever it wants with it.
+          // we only apply truncation if it's not defined
+					if (settings.formatter) {
+            formatterContext.index = i;
+            formatterContext.part = 'mainLabel';
+            formatterContext.value = d.value;
+            formatterContext.label = str;
+            str = settings.formatter(formatterContext);
+          } else if (settings.truncation.enabled && d.label.length > settings.truncation.truncateLength) {
+            str = d.label.substring(0, settings.truncation.truncateLength) + "...";
+          }
+          return str;
 				})
 				.style("font-size", settings.mainLabel.fontSize + "px")
 				.style("font-family", settings.mainLabel.font)
@@ -824,9 +842,18 @@ var labels = {
 			labelGroup.append("text")
 				.attr("id", function(d, i) { return pie.cssPrefix + "segmentPercentage" + i + "-" + section; })
 				.attr("class", pie.cssPrefix + "segmentPercentage-" + section)
-				.text(function(d) {
-					var percent = (d.value / pie.totalSize) * 100;
-					return percent.toFixed(pie.options.labels.percentage.decimalPlaces) + "%";
+				.text(function(d, i) {
+					var percentage = segments.getPercentage(pie, i, pie.options.labels.percentage.decimalPlaces);
+          if (settings.formatter) {
+            formatterContext.index = i;
+            formatterContext.part = "percentage";
+            formatterContext.value = d.value;
+            formatterContext.label = percentage;
+            percentage = settings.formatter(formatterContext);
+          } else {
+            percentage += "%";
+          }
+          return percentage;
 				})
 				.style("font-size", settings.percentage.fontSize + "px")
 				.style("font-family", settings.percentage.font)
@@ -838,7 +865,13 @@ var labels = {
 			labelGroup.append("text")
 				.attr("id", function(d, i) { return pie.cssPrefix +  "segmentValue" + i + "-" + section; })
 				.attr("class", pie.cssPrefix + "segmentValue-" + section)
-				.text(function(d) { return d.value; })
+				.text(function(d, i) {
+          formatterContext.index = i;
+          formatterContext.part = "value";
+          formatterContext.value = d.value;
+          formatterContext.label = d.value;
+          return settings.formatter ? settings.formatter(formatterContext, d.value) : d.value;
+        })
 				.style("font-size", settings.value.fontSize + "px")
 				.style("font-family", settings.value.font)
 				.style("fill", settings.value.color);
@@ -982,13 +1015,17 @@ var labels = {
 			.attr("fill", "none")
 			.style("opacity", function(d, i) {
 				var percentage = pie.options.labels.outer.hideWhenLessThanPercentage;
-				var segmentPercentage = segments.getPercentage(pie, i);
+				var segmentPercentage = segments.getPercentage(pie, i, pie.options.labels.percentage.decimalPlaces);
 				var isHidden = (percentage !== null && segmentPercentage < percentage) || pie.options.data.content[i].label === "";
 				return isHidden ? 0 : 1;
 			});
 	},
 
 	positionLabelGroups: function(pie, section) {
+    if (pie.options.labels[section].format === "none") {
+      return;
+    }
+
 		d3.selectAll("." + pie.cssPrefix + "labelGroup-" + section)
 			.style("opacity", 0)
 			.attr("transform", function(d, i) {
@@ -1035,7 +1072,7 @@ var labels = {
 				.duration(labelFadeInTime)
 				.style("opacity", function(d, i) {
 					var percentage = pie.options.labels.outer.hideWhenLessThanPercentage;
-					var segmentPercentage = segments.getPercentage(pie, i);
+					var segmentPercentage = segments.getPercentage(pie, i, pie.options.labels.percentage.decimalPlaces);
 					return (percentage !== null && segmentPercentage < percentage) ? 0 : 1;
 				});
 
@@ -1044,7 +1081,7 @@ var labels = {
 				.duration(labelFadeInTime)
 				.style("opacity", function(d, i) {
 					var percentage = pie.options.labels.inner.hideWhenLessThanPercentage;
-					var segmentPercentage = segments.getPercentage(pie, i);
+					var segmentPercentage = segments.getPercentage(pie, i, pie.options.labels.percentage.decimalPlaces);
 					return (percentage !== null && segmentPercentage < percentage) ? 0 : 1;
 				});
 
@@ -1069,7 +1106,6 @@ var labels = {
 		var addValue      = false;
 		var addPercentage = false;
 
-		// TODO refactor... somehow
 		switch (val) {
 			case "label":
 				addMainLabel = true;
@@ -1120,13 +1156,17 @@ var labels = {
 	 * This attempts to resolve label positioning collisions.
 	 */
 	resolveOuterLabelCollisions: function(pie) {
+    if (pie.options.labels.outer.format === "none") {
+      return;
+    }
+
 		var size = pie.options.data.content.length;
 		labels.checkConflict(pie, 0, "clockwise", size);
 		labels.checkConflict(pie, size-1, "anticlockwise", size);
 	},
 
 	checkConflict: function(pie, currIndex, direction, size) {
-        var i,curr;
+    var i, curr;
 
 		if (size <= 1) {
 			return;
@@ -1158,7 +1198,7 @@ var labels = {
 		// loop through *ALL* label groups examined so far to check for conflicts. This is because when they're
 		// very tightly fitted, a later label group may still appear high up on the page
 		if (direction === "clockwise") {
-            i=0;
+      i = 0;
 			for (; i<=currIndex; i++) {
 				curr = pie.outerLabelGroupData[i];
 
@@ -1170,8 +1210,8 @@ var labels = {
 				}
 			}
 		} else {
-            i=size-1;
-			for (; i>=currIndex; i--) {
+      i = size - 1;
+			for (; i >= currIndex; i--) {
 				curr = pie.outerLabelGroupData[i];
 
 				// if there's a conflict with this label group, shift the label to be AFTER the last known
@@ -1197,8 +1237,6 @@ var labels = {
 			xDiff = Math.sqrt((yDiff * yDiff) - (info.lineLength * info.lineLength));
 		}
 
-		// ahhh! info.lineLength is no longer a constant.....
-
 		if (lastCorrectlyPositionedLabel.hs === "right") {
 			newXPos = info.center.x + xDiff;
 		} else {
@@ -1213,7 +1251,11 @@ var labels = {
 	 * @param i 0-N where N is the dataset size - 1.
 	 */
 	getIdealOuterLabelPositions: function(pie, i) {
-		var labelGroupDims = d3.select("#" + pie.cssPrefix + "labelGroup" + i + "-outer").node().getBBox();
+    var labelGroupNode = d3.select("#" + pie.cssPrefix + "labelGroup" + i + "-outer").node();
+    if (!labelGroupNode) {
+      return;
+    }
+    var labelGroupDims = labelGroupNode.getBBox();
 		var angle = segments.getSegmentAngle(i, pie.options.data.content, pie.totalSize, { midpoint: true });
 
 		var originalX = pie.pieCenter.x;
@@ -1515,9 +1557,15 @@ var segments = {
 		return angle;
 	},
 
-	getPercentage: function(pie, index) {
-		return Math.floor((pie.options.data.content[index].value / pie.totalSize) * 100);
+	getPercentage: function(pie, index, decimalPlaces) {
+		var relativeAmount = pie.options.data.content[index].value / pie.totalSize;
+		if (decimalPlaces <= 0) {
+			return Math.round(relativeAmount * 100);
+		} else {
+			return (relativeAmount * 100).toFixed(decimalPlaces);
+		}
 	}
+
 };
 
 	//// --------- text.js -----------
@@ -1563,6 +1611,10 @@ var text = {
 		} else {
 			x = ((canvasWidth - canvasPadding.right) / 2) + canvasPadding.left;
 		}
+
+    // add whatever offset has been added by user
+    x += pie.options.misc.pieCenterOffset.x;
+
 		var y = canvasPadding.top + textComponents.title.h;
 
 		if (headerLocation === "pie-center") {
@@ -1618,6 +1670,10 @@ var text = {
 		} else {
 			x = ((canvasWidth - canvasPadding.right) / 2) + canvasPadding.left;
 		}
+
+    // add whatever offset has been added by user
+    x += pie.options.misc.pieCenterOffset.x;
+
 		var y = text.getHeaderHeight(pie);
 		pie.svg.select("#" + pie.cssPrefix + "subtitle")
 			.attr("x", x)
@@ -1727,10 +1783,10 @@ var tt = {
           if (pie.options.tooltips.type === "caption") {
             caption = d.caption;
           }
-          return tt.replacePlaceholders(caption, {
+          return tt.replacePlaceholders(pie, caption, i, {
             label: d.label,
             value: d.value,
-            percentage: segments.getPercentage(pie, i)
+            percentage: segments.getPercentage(pie, i, pie.options.labels.percentage.decimalPlaces)
           });
         });
 
@@ -1770,7 +1826,7 @@ var tt = {
   moveTooltip: function(pie) {
     d3.selectAll("#" + pie.cssPrefix + "tooltip" + tt.currentTooltip)
       .attr("transform", function(d) {
-        var mouseCoords = d3.mouse(this.parentElement);
+        var mouseCoords = d3.mouse(this.parentNode);
         var x = mouseCoords[0] + pie.options.tooltips.styles.padding + 2;
         var y = mouseCoords[1] - (2 * pie.options.tooltips.styles.padding) - 2;
         return "translate(" + x + "," + y + ")";
@@ -1781,21 +1837,25 @@ var tt = {
     d3.select("#" + pie.cssPrefix + "tooltip" + index)
       .style("opacity", function() { return 0; });
 
-    // move the tooltip offscreen. This ensures that when the user next mousovers the segment the hidden
+    // move the tooltip offscreen. This ensures that when the user next mouseovers the segment the hidden
     // element won't interfere
     d3.select("#" + pie.cssPrefix + "tooltip" + tt.currentTooltip)
-      .attr("transform", function(d, i) {
+       .attr("transform", function(d, i) {
 
-        // klutzy, but it accounts for tooltip padding which could push it onscreen
-        var x = pie.options.size.canvasWidth + 1000;
-        var y = pie.options.size.canvasHeight + 1000;
-        return "translate(" + x + "," + y + ")";
-      });
-
-//	  tt.currentTooltip = null;
+         // klutzy, but it accounts for tooltip padding which could push it onscreen
+         var x = pie.options.size.canvasWidth + 1000;
+         var y = pie.options.size.canvasHeight + 1000;
+         return "translate(" + x + "," + y + ")";
+       });
   },
 
-  replacePlaceholders: function(str, replacements) {
+  replacePlaceholders: function(pie, str, index, replacements) {
+
+    // if the user has defined a placeholderParser function, call it before doing the replacements
+    if (helpers.isFunction(pie.options.tooltips.placeholderParser)) {
+      pie.options.tooltips.placeholderParser(index, replacements);
+    }
+
     var replacer = function()  {
       return function(match) {
         var placeholder = arguments[1];
@@ -1856,6 +1916,10 @@ var tt = {
 	};
 
 	d3pie.prototype.recreate = function() {
+		// now run some validation on the user-defined info
+		if (!validate.initialCheck(this)) {
+			return;
+		}
 		this.options.data.content = math.sortPieData(this);
 		if (this.options.data.smallSegmentGrouping.enabled) {
 			this.options.data.content = helpers.applySmallSegmentGrouping(this.options.data.content, this.options.data.smallSegmentGrouping);
@@ -1864,7 +1928,7 @@ var tt = {
 		this.totalSize      = math.getTotalPieSize(this.options.data.content);
 
 		_init.call(this);
-	},
+	};
 
 	d3pie.prototype.redraw = function() {
 		this.element.innerHTML = "";

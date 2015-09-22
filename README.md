@@ -1,7 +1,12 @@
 spip_d3js
 ============
 
-Faire de bien joli graph avec d3js
+Faire de bien joli graphs avec d3js
+
+## Version 1.1.0
+
+* Nettoyage
+* Mise à jour des différentes libs
 
 ## Version 1.0.1
 
