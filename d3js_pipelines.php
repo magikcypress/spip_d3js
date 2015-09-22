@@ -19,7 +19,7 @@ if (!defined('_ECRIRE_INC_VERSION')) return;
  */
 function d3js_jquery_plugins($tableau){
 		$tableau[] = 'javascript/d3.js';
-		$tableau[] = 'javascript/d3pie.min.js';
+		$tableau[] = 'javascript/d3pie.js';
 		$tableau[] = 'javascript/d3-legend.js';
 		$tableau[] = 'javascript/table2d3js.js';
 	return $tableau;
