@@ -46,7 +46,6 @@ http://d3js.org/ ',
     'formulaire_config_titre' => '',
     'fichiers' => 
     array (
-      0 => 'autorisations',
       1 => 'pipelines',
     ),
     'inserer' => 

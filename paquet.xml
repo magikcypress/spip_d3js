@@ -13,7 +13,6 @@
 	<auteur>cyp</auteur>
 
 	<licence>GNU/GPL</licence>
-	<pipeline nom="autoriser" inclure="d3js_autorisations.php" /> 
 	<pipeline nom="jquery_plugins" inclure="d3js_pipelines.php" />
 	<pipeline nom="header_prive_css" action="header_prive_css" inclure="d3js_pipelines.php" />
 	<pipeline nom="insert_head_css" action="insert_head_css" inclure="d3js_pipelines.php" />
