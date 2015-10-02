@@ -14,7 +14,9 @@ Intégrer d3.js dans SPIP
 
 ### Version 1.2.0
 
-* Choisir les plugins via le pipeline ```d3js_plugins``
+* Choisir les plugins via le pipeline ```d3js_plugins```
+* Ajout de [topojson](https://github.com/mbostock/topojson)
+
 ### Version 1.1.0
 
 * Nettoyage
