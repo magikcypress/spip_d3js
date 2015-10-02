@@ -17,12 +17,18 @@ if (!defined('_ECRIRE_INC_VERSION')) return;
  *
  * @pipeline jquery_plugins
  */
-function d3js_jquery_plugins($tableau){
-		$tableau[] = 'javascript/d3.min.js';
-		$tableau[] = 'javascript/d3pie.js';
-		$tableau[] = 'javascript/d3-legend.js';
-		$tableau[] = 'javascript/table2d3js.js';
-	return $tableau;
+function d3js_jquery_plugins($plugins){
+	// Modules demandés par le pipeline jqueryui_plugins
+	$d3js_plugins = array('d3.min');
+
+	$d3js_plugins = pipeline('d3js_plugins', $d3js_plugins);
+
+	// insérer les scripts nécessaires
+	foreach ($d3js_plugins as $val) {
+		$plugins[] = "javascript/".$val.".js";
+	}
+
+	return $plugins;
 }
 
 /**
