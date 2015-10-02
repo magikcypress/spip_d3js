@@ -1,16 +1,20 @@
 spip_d3js
 ============
 
-Faire de bien joli graphs avec d3js
+Intégrer d3.js dans SPIP
 
 ## Librairies fournies
 
 * [D3.js](https://github.com/mbostock/d3/)
 * [d3-legend](https://github.com/susielu/d3-legend/)
 * [d3pie](https://github.com/benkeen/d3pie/)
+* [topojson](https://github.com/mbostock/topojson)
 
 ## Changelog
 
+### Version 1.2.0
+
+* Choisir les plugins via le pipeline ```d3js_plugins``
 ### Version 1.1.0
 
 * Nettoyage
