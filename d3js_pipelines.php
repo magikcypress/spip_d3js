@@ -21,7 +21,7 @@ function d3js_jquery_plugins($plugins){
 	// Modules demandés par le pipeline jqueryui_plugins
 	$d3js_plugins = array('d3.min');
 
-	$d3js_plugins = pipeline('d3js_plugins', $jqueryui_plugins);
+	$d3js_plugins = pipeline('d3js_plugins', $d3js_plugins);
 
 	// insérer les scripts nécessaires
 	foreach ($d3js_plugins as $val) {
