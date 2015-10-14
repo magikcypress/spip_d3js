@@ -9,47 +9,11 @@
 	shape-rendering: crispEdges;
 }
 
-.x.axis path {	
-	stroke: #D3D3D3;
-}
-
 .x.axis line,
 .y.axis line {
 	stroke: lightgrey;
 }
 
-.line {
-	fill: none;
-	stroke: #6BB7C7;
-	stroke-width: 3px;
-	stroke-linecap: round;
-}
-
-.circle {
-	stroke: white;
-	fill: #6BB7C7;
-	stroke-width: 3px;
-}
-
-div.tooltip_bar {
-	position: absolute;
-	text-align: center;
-	padding: 2px;
-	font: 12px sans-serif;
-	border-radius: 8px;
-  /*  pointer-events: none;    This line needs to be removed */
-	
-}
-
-div.tooltip {
-	position: absolute;
-	text-align: center;
-	padding: 2px;
-	font: 12px sans-serif;
-	background: lightsteelblue;
-	border: 2px solid steelblue;
-	border-radius: 8px;
-}
 
 text {
 	font: bold 10px sans-serif;
