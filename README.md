@@ -1,6 +1,8 @@
 spip_d3js
 ============
 
+/!\ Attention: ce plugin est maintenant maintenu sur la [zone de spip](http://zone.spip.org/trac/spip-zone/browser/_plugins_) /!\
+
 Intégrer d3.js dans SPIP
 
 ## Librairies fournies
