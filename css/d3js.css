@@ -49,3 +49,13 @@ text {
 	top: 100%;
 	left: 0;
 }
+
+.arc-gauge-text {
+	font-size: 25px;
+	font-weight: 100;
+	position: absolute;
+	width: 100%;
+	top: 100px;
+	text-align: center;
+	line-height: 1em;
+}
